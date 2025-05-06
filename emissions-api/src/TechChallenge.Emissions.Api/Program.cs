@@ -15,7 +15,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<IEmissionsRepository, CalculationBasedEmissionsRepository>();
-var interval = (long)TimeSpan.FromMinutes(15).TotalSeconds;
+var interval = (int)TimeSpan.FromMinutes(15).TotalSeconds;
 builder.Services
     .AddSingleton<IValueCalculator<SeededContext, double>, RandomBasedDeterministicValueCalculator>()
     .AddSingleton<IPointsProvider, PointsProvider>(
