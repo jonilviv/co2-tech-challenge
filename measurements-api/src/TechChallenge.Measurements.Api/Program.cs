@@ -1,12 +1,22 @@
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using SecurityDriven.Core;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using TechChallenge.ChaosMonkey;
 using TechChallenge.Common.Exceptions;
 using TechChallenge.DataSimulator;
 using TechChallenge.Measurements.Api;
 using TechChallenge.Measurements.Api.Data;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -14,18 +24,17 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddSingleton(TimeProvider.System);
-var intervalFrom = (int)TimeSpan.FromSeconds(1).TotalSeconds;
-var intervalTo = (int)TimeSpan.FromSeconds(10).TotalSeconds;
+int intervalFrom = (int)TimeSpan.FromSeconds(1).TotalSeconds;
+int intervalTo = (int)TimeSpan.FromSeconds(10).TotalSeconds;
 builder.Services.AddScoped<IMeasurementsRepository, CalculationBasedUserHardcodedMeasurementsRepository>();
 builder.Services
     .AddSingleton<IValueCalculator<SeededContext, double>, RandomBasedDeterministicValueCalculator>()
-    .AddSingleton<IPointsProvider, PointsProvider>(
-        sp => ActivatorUtilities.CreateInstance<PointsProvider>(sp, intervalFrom, intervalTo));
+    .AddSingleton<IPointsProvider, PointsProvider>(sp => ActivatorUtilities.CreateInstance<PointsProvider>(sp, intervalFrom, intervalTo));
 
-var chaosChance = ChausChance.FromPercentage(builder.Configuration.GetValue<int>("ChaosMonkey:Percentage"));
+ChausChance chaosChance = ChausChance.FromPercentage(builder.Configuration.GetValue<int>("ChaosMonkey:Percentage"));
 builder.Services.AddScoped<IChaosMonkey>(sp => new ErrorChaosMonkey(chaosChance, CryptoRandom.Shared));
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 app.UseSwagger();
 app.UseSwaggerUI();
@@ -47,14 +56,20 @@ app.MapGet(
                            ["userId"] = userId,
                            ["from"] = from,
                            ["to"] = to,
-                       })) ;
+                       }))
+            {
+            }
+
             try
             {
                 await chaosMonkey.UnleashChaos();
-                if (from >= to)
-                    return Results.BadRequest("Invalid request time frame");
 
-                var measurements =
+                if (from >= to)
+                {
+                    return Results.BadRequest("Invalid request time frame");
+                }
+
+                IAsyncEnumerable<MeasurementResponse> measurements =
                     repository
                         .GetMeasurementsAsync(
                             userId,

@@ -1,5 +1,15 @@
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using SecurityDriven.Core;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using TechChallenge.ChaosMonkey;
 using TechChallenge.Common.Exceptions;
 using TechChallenge.DataSimulator;
@@ -45,13 +55,19 @@ app.MapGet(
                        {
                            ["from"] = from,
                            ["to"] = to,
-                       })) ;
+                       }))
+            {
+                ;
+            }
+
             try
             {
                 await chaosMonkey.UnleashChaos();
 
                 if (from >= to)
+                {
                     return Results.BadRequest("Invalid request time frame");
+                }
 
                 var measurements =
                     repository

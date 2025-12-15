@@ -1,3 +1,5 @@
+using System;
+
 namespace TechChallenge.Common.Exceptions;
 
 public class NotFoundException : Exception

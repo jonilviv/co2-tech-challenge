@@ -9,6 +9,8 @@ public class RandomBasedDeterministicValueCalculator : IValueCalculator<SeededCo
         var random = new CryptoRandom(context.Seed);
         var timestampRandom = new CryptoRandom((int)context.Timestamp);
 
-        return random.NextDouble()*timestampRandom.NextDouble()*context.Factor;
+        double contextFactor = random.NextDouble() * timestampRandom.NextDouble() * context.Factor;
+
+        return contextFactor;
     }
 }

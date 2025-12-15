@@ -1,16 +1,27 @@
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using TechChallenge.DataSimulator;
 
 namespace TechChallenge.Emissions.Api.Data;
 
-public class CalculationBasedEmissionsRepository(
-    IPointsProvider pointsProvider,
-    TimeProvider timeProvider,
-    ILogger<CalculationBasedEmissionsRepository> logger
-) : IEmissionsRepository
+public class CalculationBasedEmissionsRepository : IEmissionsRepository
 {
+    private readonly IPointsProvider _pointsProvider;
+    private readonly TimeProvider _timeProvider;
+
+    public CalculationBasedEmissionsRepository(IPointsProvider pointsProvider,
+        TimeProvider timeProvider,
+        ILogger<CalculationBasedEmissionsRepository> logger)
+    {
+        _pointsProvider = pointsProvider;
+        _timeProvider = timeProvider;
+    }
+
     private const string Kye = "emissions";
     private const double Factor = 10;
 
@@ -19,28 +30,30 @@ public class CalculationBasedEmissionsRepository(
         long to,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        DateTimeOffset dataLimit = timeProvider.GetUtcNow().AddDays(1);
+        DateTimeOffset dataLimit = _timeProvider.GetUtcNow().AddDays(1);
         to = Math.Min(to, dataLimit.ToUnixTimeSeconds());
-        var userSeed = CalculateSeed(Kye);
-        foreach (var point in pointsProvider.GetPoints(
-                     from,
-                     to,
-                     userSeed,
-                     Factor))
+        int userSeed = CalculateSeed(Kye);
+        IEnumerable<Point> enumerable = _pointsProvider.GetPoints(from, to, userSeed, Factor);
+
+        foreach (Point point in enumerable)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            yield return new Emission
+            var emission = new Emission
             {
                 Timestamp = point.Timestamp,
                 KgPerWattHr = point.Value
             };
+
+            yield return emission;
         }
     }
 
     private static int CalculateSeed(string input)
     {
-        var bytes = Encoding.UTF8.GetBytes(input);
-        var hashBytes = SHA256.HashData(bytes);
-        return BitConverter.ToInt32(hashBytes, 0);
+        byte[] bytes = Encoding.UTF8.GetBytes(input);
+        byte[] hashBytes = SHA256.HashData(bytes);
+        int calculateSeed = BitConverter.ToInt32(hashBytes, 0);
+
+        return calculateSeed;
     }
 }

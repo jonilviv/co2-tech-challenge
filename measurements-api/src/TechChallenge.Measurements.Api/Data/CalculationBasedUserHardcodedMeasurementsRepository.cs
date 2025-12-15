@@ -1,17 +1,30 @@
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using TechChallenge.Common.Exceptions;
 using TechChallenge.DataSimulator;
 
 namespace TechChallenge.Measurements.Api.Data;
 
-public class CalculationBasedUserHardcodedMeasurementsRepository(
-    TimeProvider timeProvider,
-    IPointsProvider pointsProvider,
-    ILogger<CalculationBasedUserHardcodedMeasurementsRepository> logger
-) : IMeasurementsRepository
+public class CalculationBasedUserHardcodedMeasurementsRepository : IMeasurementsRepository
 {
+    private readonly TimeProvider _timeProvider;
+    private readonly IPointsProvider _pointsProvider;
+    private readonly ILogger<CalculationBasedUserHardcodedMeasurementsRepository> _logger;
+
+    public CalculationBasedUserHardcodedMeasurementsRepository(TimeProvider timeProvider,
+        IPointsProvider pointsProvider,
+        ILogger<CalculationBasedUserHardcodedMeasurementsRepository> logger)
+    {
+        _timeProvider = timeProvider;
+        _pointsProvider = pointsProvider;
+        _logger = logger;
+    }
+
     private static readonly IReadOnlyDictionary<string, double> UserHardcodedFactors =
         new Dictionary<string, double>
         {
@@ -33,35 +46,40 @@ public class CalculationBasedUserHardcodedMeasurementsRepository(
     {
         if (!UserHardcodedFactors.ContainsKey(userId))
         {
-            logger.LogWarning("User {userId} was not found", userId);
+            _logger.LogWarning("User {userId} was not found", userId);
+
             throw new NotFoundException("User was not found");
         }
 
-        DateTimeOffset dataLimit = timeProvider.GetUtcNow();
+        DateTimeOffset dataLimit = _timeProvider.GetUtcNow();
         to = Math.Min(to, dataLimit.ToUnixTimeSeconds());
 
-        var userSeed = CalculateSeed(userId);
-        var factor = UserHardcodedFactors[userId];
-        foreach (var point in pointsProvider.GetPoints(
-                     from,
-                     to,
-                     userSeed,
-                     factor))
+        int userSeed = CalculateSeed(userId);
+        double factor = UserHardcodedFactors[userId];
+
+        IEnumerable<Point> enumerable = _pointsProvider.GetPoints(from, to, userSeed, factor);
+
+        foreach (Point point in enumerable)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            yield return new Measurement
+
+            var measurement = new Measurement
             {
                 UserId = userId,
                 Timestamp = point.Timestamp,
                 Watts = point.Value
             };
+
+            yield return measurement;
         }
     }
 
     private static int CalculateSeed(string input)
     {
-        var bytes = Encoding.UTF8.GetBytes(input);
-        var hashBytes = SHA256.HashData(bytes);
-        return BitConverter.ToInt32(hashBytes, 0);
+        byte[] bytes = Encoding.UTF8.GetBytes(input);
+        byte[] hashBytes = SHA256.HashData(bytes);
+        int calculateSeed = BitConverter.ToInt32(hashBytes, 0);
+
+        return calculateSeed;
     }
 }
