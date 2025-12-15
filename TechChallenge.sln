@@ -1,5 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.1.11304.174
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "shared", "shared", "{024353D0-17BC-4C45-9B79-A30ABA785F2E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{2DE97E86-BE71-4399-AEB7-8FD7A57D7D7F}"
@@ -22,6 +25,24 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TechChallenge.Common", "sha
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TechChallenge.ChaosMonkey", "shared\src\TechChallenge.ChaosMonkey\TechChallenge.ChaosMonkey.csproj", "{DA455C0E-3487-4A62-9B17-1AE491E4A79E}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "calculator-api", "calculator-api", "{DE9330F7-6BE2-B1FE-2F65-A29389EC4186}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{C9588F4E-C40A-B34C-D07F-821604D30829}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TechChallenge.Calculator.Api", "calculator-api\src\TechChallenge.Calculator.Api\TechChallenge.Calculator.Api.csproj", "{EFC54F76-17C5-47F8-9FC4-0CE69120E61A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3270657D-4A23-4722-B7E4-153E06D22EC5}"
+	ProjectSection(SolutionItems) = preProject
+		.dockerignore = .dockerignore
+		.editorconfig = .editorconfig
+		.gitignore = .gitignore
+		Directory.Build.props = Directory.Build.props
+		Directory.Packages.props = Directory.Packages.props
+		docker-compose.yml = docker-compose.yml
+		NOTES.md = NOTES.md
+		README.md = README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,6 +57,8 @@ Global
 		{2D80C218-6AF4-4454-83D4-198DE484F403} = {19193D5E-2092-4D1A-AD86-DA554DD604CB}
 		{17E04EB7-4F1B-4C55-AEC2-6D3C9CBEBACB} = {2DE97E86-BE71-4399-AEB7-8FD7A57D7D7F}
 		{DA455C0E-3487-4A62-9B17-1AE491E4A79E} = {2DE97E86-BE71-4399-AEB7-8FD7A57D7D7F}
+		{C9588F4E-C40A-B34C-D07F-821604D30829} = {DE9330F7-6BE2-B1FE-2F65-A29389EC4186}
+		{EFC54F76-17C5-47F8-9FC4-0CE69120E61A} = {C9588F4E-C40A-B34C-D07F-821604D30829}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{CB3723F6-6A2F-4FEF-97C4-92219E4B5C05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -58,5 +81,12 @@ Global
 		{DA455C0E-3487-4A62-9B17-1AE491E4A79E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DA455C0E-3487-4A62-9B17-1AE491E4A79E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DA455C0E-3487-4A62-9B17-1AE491E4A79E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EFC54F76-17C5-47F8-9FC4-0CE69120E61A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EFC54F76-17C5-47F8-9FC4-0CE69120E61A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EFC54F76-17C5-47F8-9FC4-0CE69120E61A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EFC54F76-17C5-47F8-9FC4-0CE69120E61A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal
